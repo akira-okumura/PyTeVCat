@@ -1,5 +1,6 @@
 """
 Python interface for TeVCat (http://tevcat.uchicago.edu/)
+$Id$
 """
 
 import urllib
