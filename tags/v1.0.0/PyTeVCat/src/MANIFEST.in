@@ -1,0 +1,3 @@
+setup.py
+recursive-include tevcat *py
+recursive-include tevcat/img *.png
