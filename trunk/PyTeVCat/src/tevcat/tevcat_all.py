@@ -7,7 +7,7 @@ import urllib
 import base64
 import tempfile
 import json
-import coords
+import astropysics.coords
 import pkg_resources
 
 observatory_names = ('', 'Whipple', 'Telescope Array', 'HEGRA', '',
@@ -127,17 +127,14 @@ class Source(object):
         if self.discovery_date != None and ((not (1 <= self.discovery_date%100 <= 12)) or not (1987 <= self.discovery_date/100 <= 2020)):
             print 'Invalid date format found: %d' % self.discovery_date
 
-        dd = (float(source[u'coord_gal_lon']), float(source[u'coord_gal_lat']))
-        self.coord_gal = coords.Position(dd, system = 'galactic', units = 'degree')
-        
         self.other_names = source[u'other_names']
-        
+
         self.canonical_name = str(source[u'canonical_name'])
-        
+
         self.marker_id = source[u'marker_id'] # No use? always None
 
         self.public = int(source[u'public']) # No use? always 1
-        
+
         self.spec_idx = None if source[u'spec_idx'] == None else float(source[u'spec_idx'])
 
         self.private_notes = source[u'private_notes']
@@ -167,7 +164,10 @@ class Source(object):
         if coord_dec[-1] == ' ':
             coord_dec = coord_dec[:-1]
         hmsdms = str(coord_ra.replace(' ', ':')) + ' ' +  str(coord_dec.replace(' ', ':'))
-        self.coord = coords.Position(hmsdms, system = 'celestial', equinox='J2000')
+        self.fk5 = astropysics.coords.FK5Coordinates(hmsdms)
+
+        # lon, lat = float(source[u'coord_gal_lon']), float(source[u'coord_gal_lat'])
+        self.galactic = self.getPosition().convert(astropysics.coords.GalacticCoordinates)
 
         self.notes = source[u'notes']
 
@@ -287,33 +287,41 @@ class Source(object):
 
     def getPosition(self):
         """
-        Retuns the celestial position of the source.
+        Returns the celestial position of the source.
         """
-        return self.coord
+        return self.fk5
 
-    def getJ2000(self):
+    def getICRS(self):
         """
-        Returns (RA, Dec) of the source (J2000).
+        Returns ICRS coordinates
         """
-        return self.getPosition().j2000()
+        icrs = self.getPosition().convert(astropysics.coords.ICRSCoordinates)
+        return icrs
 
-    def getB1950(self):
+    def getFK5(self):
         """
-        Returns (RA, Dec) of the source (B1950).
+        Returns FK5 coordinates (J2000)
         """
-        return self.getPosition().b1950()
+        return self.getPosition()
+
+    def getFK4(self):
+        """
+        Returns FK4 coordinates (B1950)
+        """
+        fk4 = self.getPosition().convert(astropysics.coords.FK4Coordinates)
+        return fk4
 
     def getGalactic(self):
         """
-        Returns (lon, lat) of the source (Galactic).
+        Returns Galactic coordinates
         """
-        return self.getPosition().galactic()
+        return self.galactic
 
     def getHMSDMS(self):
         """
         Returns (RA, Dec) of the source in (HH:MM:SS, DD:MM:SS) format (J2000)
         """
-        return self.getPosition().hmsdms()
+        return self.getPosition().ra.getHmsStr() + " " + self.getPosition().dec.getDmsStr()
 
     def getNotes(self):
         """
@@ -363,8 +371,8 @@ class Source(object):
         s += 'Source Type:\t%s\n' % self.getSourceTypeName()
         s += 'RA:\t%s (hh mm ss)\n' % self.getHMSDMS().split()[0]
         s += 'Dec:\t%s (dd mm ss)\n' % self.getHMSDMS().split()[1]
-        s += 'Gal Long:\t%.2f (deg)\n' % self.getGalactic()[0]
-        s += 'Gal Lat:\t%.2f (deg)\n' % self.getGalactic()[1]
+        s += 'Gal Long:\t%.2f (deg)\n' % self.getGalactic().l.degrees
+        s += 'Gal Lat:\t%.2f (deg)\n' % self.getGalactic().b.degrees
         dist = self.getDistance()
         if dist[1] == 'z':
             s += 'Distance:\tz = %f\n' % dist[0]
@@ -619,7 +627,7 @@ else:
                     continue
 
                 gal = source.getGalactic()
-                x, y = self.sky2pad(gal[0], gal[1])
+                x, y = self.sky2pad(gal.l.degrees, gal.b.degrees)
                 source_type_name = source.getSourceTypeName()
                 try:
                     self.graphs[source_type_name]
@@ -684,9 +692,9 @@ else:
                     continue
                 
                 if useThisSource:
-                    pos = source.getPosition()
-                    cursor_pos = coords.Position(lb, system='galactic')
-                    angsep = pos.angsep(cursor_pos)
+                    pos = source.getGalactic()
+                    cursor_pos = astropysics.coords.GalacticCoordinates(lb[0], lb[1])
+                    angsep = (pos - cursor_pos).arcmin/60.
                     if angsep < minimum_angsep:
                         minimum_angsep = angsep
                         nearby_source = source
@@ -696,7 +704,9 @@ else:
                 return
 
             text = ROOT.TGText('')
-            info = str(nearby_source.__str__().replace(u'\u2212', u'-'))
+            info = nearby_source.__str__().replace(u'\xb0', u'') # another candidate?
+            info = str(info.replace(u'\u2212', u'-'))
+            
             for i, line in enumerate(info.split('\n')):
                 text.InsLine(i, line)
             self.info.SetText(text)
