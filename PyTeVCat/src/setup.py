@@ -3,12 +3,10 @@ Setup script for PyTeVCat
 $Id$
 """
 
-import tevcat
-
 from numpy.distutils.core import setup
 
 setup(name="PyTeVCat",
-      version="1.1.0",
+      version="1.1.1",
       description="Python wrapper for TeVCat",
       author="Akira Okumura",
       author_email="oxon@mac.com",
@@ -23,5 +21,5 @@ setup(name="PyTeVCat",
                    'Development Status :: 4 - Beta',
                    'Programming Language :: Python',
                    ],
-      long_description=tevcat.__doc__
+      long_description='tevcat.Python interface for TeVCat (http://tevcat.uchicago.edu/)'
       )
