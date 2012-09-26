@@ -21,7 +21,7 @@ source_type_names = ('', 'HBL', '', '', '',
                      '', 'Shell', 'Starburst', 'UNID', '',
                      '', 'XRB', 'Cat. Var.', '', 'FSRQ',
                      'IBL', '', 'Gamma BIN', '', 'SNR/Molec. Cloud',
-                     'Massive Star Cluster', 'AGN (unknown type)', 'Star Forming Region', '', '')
+                     'Massive Star Cluster', 'AGN (unknown type)', 'Star Forming Region', 'Globular Cluster', '')
 
 class TeVCat(object):
     def __init__(self):
