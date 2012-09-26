@@ -6,7 +6,7 @@ $Id$
 from numpy.distutils.core import setup
 
 setup(name="PyTeVCat",
-      version="1.1.2",
+      version="1.1.3",
       description="Python wrapper for TeVCat",
       author="Akira Okumura",
       author_email="oxon@mac.com",
