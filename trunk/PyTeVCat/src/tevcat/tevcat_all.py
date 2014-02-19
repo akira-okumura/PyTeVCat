@@ -10,18 +10,40 @@ import json
 import astropysics.coords
 import pkg_resources
 
-observatory_names = ('', 'Whipple', 'Telescope Array', 'HEGRA', '',
-                     'CANGAROO', 'H.E.S.S.', 'MAGIC', 'Milagro', 'Durham',
-                     'Crimea', '', '', '', 'VERITAS',
-                     'Potchefstroom')
+observatory_names = {1:  'Whipple',
+                     2:  'Telescope Array',
+                     3:  'HEGRA',
+                     5:  'CANGAROO',
+                     6:  'H.E.S.S.',
+                     7:  'MAGIC',
+                     8:  'Milagro',
+                     9:  'Durham',
+                     10: 'Crimea',
+                     14: 'VERITAS',
+                     15: 'Potchefstroom',
+                     19: 'ARGO-YBJ'}
 
-source_type_names = ('', 'HBL', '', '', '',
-                     '', '', 'DARK', 'FRI', '',
-                     'LBL', '', '', 'PSR', 'PWN',
-                     '', 'Shell', 'Starburst', 'UNID', '',
-                     '', 'XRB', 'Cat. Var.', '', 'FSRQ',
-                     'IBL', '', 'Gamma BIN', '', 'SNR/Molec. Cloud',
-                     'Massive Star Cluster', 'AGN (unknown type)', 'Star Forming Region', 'Globular Cluster', '')
+source_type_names = {1:  'HBL',
+                     7:  'DARK',
+                     8:  'FRI',
+                     10: 'LBL',
+                     13: 'PSR',
+                     14: 'PWN',
+                     16: 'Shell',
+                     17: 'Starburst',
+                     18: 'UNID',
+                     21: 'XRB',
+                     22: 'Cat. Var.',
+                     24: 'FSRQ',
+                     25: 'IBL',
+                     27: 'Gamma BIN',
+                     29: 'SNR/Molec. Cloud',
+                     30: 'Massive Star Cluster',
+                     31: 'AGN (unknown type)',
+                     32: 'Star Forming Region',
+                     33: 'Globular Cluster',
+                     35: 'Binary',
+                     36: 'Composite SNR'}
 
 class TeVCat(object):
     def __init__(self):
@@ -101,7 +123,7 @@ class Source(object):
         self.tevcat = tevcat
         
         self.observatory_name = str(source[u'observatory_name'])
-        if self.observatory_name not in observatory_names:
+        if self.observatory_name not in observatory_names.values():
             print 'Unknown observatory name found: ', self.observatory_name
 
         self.discoverer = int(source[u'discoverer'])
@@ -150,7 +172,7 @@ class Source(object):
         self.coord_type = source[u'coord_type'] # No use? always null or 0
 
         self.source_type_name = str(source[u'source_type_name'])
-        if self.source_type_name not in source_type_names:
+        if self.source_type_name not in source_type_names.values():
             print 'Unknown source type name found: ', self.source_type_name
         if source_type_names[self.source_type] != self.source_type_name:
             print '"source_type" (%d) does not match with "source_type_name" (%s)' % (self.source_type, self.source_type_name)
@@ -655,7 +677,7 @@ else:
                 gra.SetMarkerSize(1)
 
             # Draw legend
-            self.legend = ROOT.TLegend(0., 0., 0.22, 0.21)
+            self.legend = ROOT.TLegend(0., 0., 0.22, 0.18)
             self.legend.SetNColumns(2)
             self.legend.SetBorderSize(0)
             self.legend.SetFillStyle(0)
@@ -705,7 +727,7 @@ else:
 
             text = ROOT.TGText('')
             info = nearby_source.__str__().replace(u'\xb0', u'') # another candidate?
-            info = str(info.replace(u'\u2212', u'-'))
+            info = str(info.replace(u'\u2212', u'-').replace(u'\u2013', u'-'))
             
             for i, line in enumerate(info.split('\n')):
                 text.InsLine(i, line)

@@ -6,13 +6,13 @@ $Id$
 from numpy.distutils.core import setup
 
 setup(name="PyTeVCat",
-      version="1.1.3",
+      version="1.1.4",
       description="Python wrapper for TeVCat",
       author="Akira Okumura",
       author_email="oxon@mac.com",
       url='https://sourceforge.net/p/pytevcat/',
       license='BSD License',
-      platforms=['MacOS :: MacOS X', 'POSIX', 'Windows'],
+      platforms=['MacOS :: MacOS X', 'POSIX'],
       packages=["tevcat"],
       install_requires=['astropysics', 'networkx'],
       package_data={"tevcat": ["img/*.png",]},
