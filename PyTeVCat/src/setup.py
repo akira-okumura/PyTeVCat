@@ -6,7 +6,7 @@ $Id$
 from numpy.distutils.core import setup
 
 setup(name="PyTeVCat",
-      version="1.1.4",
+      version="1.1.5",
       description="Python wrapper for TeVCat",
       author="Akira Okumura",
       author_email="oxon@mac.com",
@@ -14,7 +14,7 @@ setup(name="PyTeVCat",
       license='BSD License',
       platforms=['MacOS :: MacOS X', 'POSIX'],
       packages=["tevcat"],
-      install_requires=['astropysics', 'networkx'],
+      install_requires=['astropysics', 'networkx', 'scipy'],
       package_data={"tevcat": ["img/*.png",]},
       classifiers=['Topic :: Scientific/Engineering :: Astronomy',
                    'Topic :: Scientific/Engineering :: Physics',

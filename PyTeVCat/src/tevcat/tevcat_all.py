@@ -361,7 +361,7 @@ class Source(object):
         """
         Retruns True if the source is extended one.
         """
-        return self.extended
+        return self.ext
 
     def getCatalog(self):
         """
