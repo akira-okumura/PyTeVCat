@@ -43,7 +43,8 @@ source_type_names = {1:  'HBL',
                      32: 'Star Forming Region',
                      33: 'Globular Cluster',
                      35: 'Binary',
-                     36: 'Composite SNR'}
+                     36: 'Composite SNR',
+                     37: 'Blazar'}
 
 class TeVCat(object):
     def __init__(self):
@@ -65,7 +66,6 @@ class TeVCat(object):
         self.sources = []
         for i in range(len(self.json[u'sources'])):
             self.sources.append(Source(self.json[u'sources'][i], self))
-
         self.catalogs = {}
         for key in self.json[u'catalogs'].keys():
             self.catalogs[int(key)] = Catalog(self.json[u'catalogs'][key])
