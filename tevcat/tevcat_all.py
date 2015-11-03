@@ -20,7 +20,8 @@ observatory_names = {1:  'Whipple',
                      10: 'Crimea',
                      14: 'VERITAS',
                      15: 'Potchefstroom',
-                     19: 'ARGO-YBJ'}
+                     19: 'ARGO-YBJ',
+                     22: 'HAWC'}
 
 source_type_names = {1:  'HBL',
                      7:  'DARK',
@@ -43,7 +44,8 @@ source_type_names = {1:  'HBL',
                      33: 'Globular Cluster',
                      35: 'Binary',
                      36: 'Composite SNR',
-                     37: 'Blazar'}
+                     37: 'Blazar',
+                     38: 'Superbubble'}
 
 class TeVCat(object):
     def __init__(self):
@@ -126,8 +128,11 @@ class Source(object):
             print 'Unknown observatory name found: ', self.observatory_name
 
         self.discoverer = int(source[u'discoverer'])
-        if observatory_names[self.discoverer] != self.observatory_name:
-            print '"discoverer" (%d) does not match with "observatory_name" (%s)' % (self.discoverer, self.observatory_name)
+        try:
+            if observatory_names[self.discoverer] != self.observatory_name:
+                print '"discoverer" (%d) does not match with "observatory_name" (%s)' % (self.discoverer, self.observatory_name)
+        except:
+            raise BaseException('Cannot find discoverer "%s" (%d)' % (self.observatory_name, self.discoverer))
             
         self.variability = None if source[u'variability'] == None else int(source[u'variability'])
         if self.variability not in (None, 0, 1, 2):
