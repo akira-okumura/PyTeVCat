@@ -47,6 +47,10 @@ source_type_names = {1:  'HBL',
                      37: 'Blazar',
                      38: 'Superbubble'}
 
+def p(a, b):
+    return a[0:b]
+
+
 class TeVCat(object):
     def __init__(self):
         """
@@ -59,7 +63,7 @@ class TeVCat(object):
         for line in f.readlines():
             if line.find('Version') >= 0:
                 self.version = line.split()[-1]
-            elif line.find('var jsonData = atob("') >= 0:
+            elif line.find('var dat  =') >= 0:
                 data = line.split('"')[1]
 
         self.json = json.loads(base64.b64decode(data))
@@ -149,7 +153,7 @@ class Source(object):
 
         self.id = int(source[u'id'])
 
-        self.discovery_date = None if source[u'discovery_date'] == None else int(source[u'discovery_date'])
+        self.discovery_date = None if source[u'discovery_date'] == None else int(source[u'discovery_date'].replace('/', ''))
         if self.discovery_date != None and ((not (1 <= self.discovery_date%100 <= 12)) or not (1987 <= self.discovery_date/100 <= 2020)):
             print 'Invalid date format found: %d' % self.discovery_date
 
@@ -437,12 +441,12 @@ else:
     import __main__
     class Viewer(ROOT.TGMainFrame):
         def __init__(self):
-            ROOT.TGMainFrame.__init__(self, ROOT.gClient.GetRoot(), 10, 10, ROOT.kHorizontalFrame)
+            ROOT.TGMainFrame.__init__(self, 0, 10, 10, ROOT.kHorizontalFrame)
             self.tevcat = TeVCat()
 
             self.xsize = 1440
             self.ysize = 720
-            self.subsize = 200
+            self.subsize = 300
 
             self.controls = ROOT.TGVerticalFrame(self)
             self.AddFrame(self.controls, ROOT.TGLayoutHints(ROOT.kLHintsRight | ROOT.kLHintsExpandY, 5, 5, 5, 5))
