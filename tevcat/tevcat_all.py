@@ -65,8 +65,15 @@ class TeVCat(object):
                 self.version = line.split()[-1]
             elif line.find('var dat  =') >= 0:
                 data = line.split('"')[1]
+            else:
+                vars = line.split(' ')[-4:];
+                if len(vars) == 4 and vars[0] == 'var' and vars[2] == '=':
+                    try:
+                        lim = int(vars[3][:-2])
+                    except:
+                        pass
 
-        self.json = json.loads(base64.b64decode(data))
+        self.json = json.loads(base64.b64decode(data[0:lim]))
 
         self.sources = []
         for i in range(len(self.json[u'sources'])):
