@@ -65,13 +65,8 @@ class TeVCat(object):
                 self.version = line.split()[-1]
             elif line.find('var dat  =') >= 0:
                 data = line.split('"')[1]
-            else:
-                vars = line.split(' ')[-4:];
-                if len(vars) == 4 and vars[0] == 'var' and vars[2] == '=':
-                    try:
-                        lim = int(vars[3][:-2])
-                    except:
-                        pass
+            elif line.find('pytevcat') >= 0:
+                lim = int(line.split('pytevcat = ')[1].split(';')[0])
 
         self.json = json.loads(base64.b64decode(data[0:lim]))
 
