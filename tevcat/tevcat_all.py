@@ -6,8 +6,11 @@ import urllib
 import base64
 import tempfile
 import json
-import astropysics.coords
+from astropy.coordinates import SkyCoord, Angle
+from astropy import units as u
 import pkg_resources
+import math
+import numpy
 
 observatory_names = {1:  'Whipple',
                      2:  'Telescope Array',
@@ -42,6 +45,7 @@ source_type_names = {1:  'HBL',
                      31: 'AGN (unknown type)',
                      32: 'Star Forming Region',
                      33: 'Globular Cluster',
+                     34: 'BL Lac (class unclear)',
                      35: 'Binary',
                      36: 'Composite SNR',
                      37: 'Blazar',
@@ -195,11 +199,11 @@ class Source(object):
             coord_ra = coord_ra[:-1]
         if coord_dec[-1] == ' ':
             coord_dec = coord_dec[:-1]
-        hmsdms = str(coord_ra.replace(' ', ':')) + ' ' +  str(coord_dec.replace(' ', ':'))
-        self.fk5 = astropysics.coords.FK5Coordinates(hmsdms)
-
-        # lon, lat = float(source[u'coord_gal_lon']), float(source[u'coord_gal_lat'])
-        self.galactic = self.getPosition().convert(astropysics.coords.GalacticCoordinates)
+        hms, dms = str(coord_ra.replace(' ', ':')), str(coord_dec.replace(' ', ':'))
+        self.fk5 = SkyCoord(hms + ' ' + dms, frame='fk5', unit=(u.hourangle, u.deg))
+        self.galactic = self.getPosition().transform_to('galactic')
+        self.glon = self.galactic.l
+        self.glat = self.galactic.b
 
         self.notes = source[u'notes']
 
@@ -327,7 +331,7 @@ class Source(object):
         """
         Returns ICRS coordinates
         """
-        icrs = self.getPosition().convert(astropysics.coords.ICRSCoordinates)
+        icrs = self.getPosition().transform_to('icrs')
         return icrs
 
     def getFK5(self):
@@ -340,7 +344,7 @@ class Source(object):
         """
         Returns FK4 coordinates (B1950)
         """
-        fk4 = self.getPosition().convert(astropysics.coords.FK4Coordinates)
+        fk4 = self.getPosition().transform_to('fk4')
         return fk4
 
     def getGalactic(self):
@@ -353,7 +357,7 @@ class Source(object):
         """
         Returns (RA, Dec) of the source in (HH:MM:SS, DD:MM:SS) format (J2000)
         """
-        return self.getPosition().ra.getHmsStr() + " " + self.getPosition().dec.getDmsStr()
+        return self.getPosition().to_string('hmsdms')
 
     def getNotes(self):
         """
@@ -403,8 +407,8 @@ class Source(object):
         s += 'Source Type:\t%s\n' % self.getSourceTypeName()
         s += 'RA:\t%s (hh mm ss)\n' % self.getHMSDMS().split()[0]
         s += 'Dec:\t%s (dd mm ss)\n' % self.getHMSDMS().split()[1]
-        s += 'Gal Long:\t%.2f (deg)\n' % self.getGalactic().l.degrees
-        s += 'Gal Lat:\t%.2f (deg)\n' % self.getGalactic().b.degrees
+        s += 'Gal Long:\t%.2f (deg)\n' % self.getGalactic().l.degree
+        s += 'Gal Lat:\t%.2f (deg)\n' % self.getGalactic().b.degree
         dist = self.getDistance()
         if dist[1] == 'z':
             s += 'Distance:\tz = %f\n' % dist[0]
@@ -437,6 +441,8 @@ class Source(object):
 
 try:
     import ROOT
+    rad2deg = ROOT.TMath.RadToDeg()
+    deg2rad = ROOT.TMath.DegToRad()
 except:
     pass
 else:
@@ -659,7 +665,7 @@ else:
                     continue
 
                 gal = source.getGalactic()
-                x, y = self.sky2pad(gal.l.degrees, gal.b.degrees)
+                x, y = self.sky2pad(gal.l.degree, gal.b.degree)
                 source_type_name = source.getSourceTypeName()
                 try:
                     self.graphs[source_type_name]
@@ -710,9 +716,13 @@ else:
                 return
 
             nearby_source = None
-            minimum_angsep = 1e10
+            minimum_angsep = Angle(180*u.deg)
 
             search = self.search_box.GetText().lower()
+
+            sources = []
+            cursor_pos = SkyCoord(lb[0], lb[1], frame='galactic', unit='deg')
+
             for source in self.tevcat.getSources():
                 useThisSource = None
                 for i in range(len(self.cat_check)):
@@ -722,15 +732,16 @@ else:
 
                 if source.__str__().lower().find(search) < 0:
                     continue
-                
-                if useThisSource:
-                    pos = source.getGalactic()
-                    cursor_pos = astropysics.coords.GalacticCoordinates(lb[0], lb[1])
-                    angsep = (pos - cursor_pos).arcmin/60.
-                    if angsep < minimum_angsep:
-                        minimum_angsep = angsep
-                        nearby_source = source
 
+                sources.append(source)
+
+            pos = SkyCoord(l=[s.glon for s in sources], b=[s.glat for s in sources], frame='galactic')
+            angsep = pos.separation(cursor_pos)
+            degs = angsep.degree
+            i = numpy.argmin(degs)
+            minimum_angsep = degs[i]
+            nearby_source = sources[i]
+                
             if minimum_angsep > 3.:
                 self.info.SetText(ROOT.TGText(""))
                 return
@@ -743,21 +754,21 @@ else:
                 text.InsLine(i, line)
             self.info.SetText(text)
             self.info.Update()
-            
+
         def pad2sky(self, x, y):
-            c = ROOT.TMath.Sqrt2()*2./ROOT.TMath.Pi()
+            c = 1.4142135623730951*2./math.pi
             x_ = -((x - (1. - c)/2.)/c*4. - 2.)
             y_ = (y - (1. - c)/2.)*2./c - 1.
 
             gamma = (2. - (x_/2.)**2 - y_**2)**-0.5
-            theta = ROOT.TMath.ASin(y_/gamma)
-            phi = ROOT.TMath.ASin(x_/(2.*gamma*ROOT.TMath.Cos(theta)))*2.
+            theta = math.asin(y_/gamma)
+            phi = math.asin(x_/(2.*gamma*math.cos(theta)))*2.
             
-            if ROOT.TMath.Abs(x_) > 2.*ROOT.TMath.Cos(theta) or ROOT.TMath.Abs(y_) > 1.:
+            if abs(x_) > 2.*math.cos(theta) or abs(y_) > 1.:
                 return None
 
-            l = phi*ROOT.TMath.RadToDeg()
-            b = theta*ROOT.TMath.RadToDeg()
+            l = phi*rad2deg
+            b = theta*rad2deg
             
             return (l, b)
             
@@ -765,18 +776,18 @@ else:
             while l > 180.:
                 l -= 360
 
-            theta = b*ROOT.TMath.DegToRad()
-            phi   = l*ROOT.TMath.DegToRad()
-            gamma = (1 + ROOT.TMath.Cos(theta)*ROOT.TMath.Cos(phi/2.))**-0.5
-            x_ = 2*gamma*ROOT.TMath.Cos(theta)*ROOT.TMath.Sin(phi/2.)
-            y_ = gamma*ROOT.TMath.Sin(theta)
+            theta = b*deg2rad
+            phi   = l*deg2rad
+            gamma = (1 + math.cos(theta)*math.cos(phi/2.))**-0.5
+            x_ = 2*gamma*math.cos(theta)*math.sin(phi/2.)
+            y_ = gamma*math.sin(theta)
 
             # CDELT1 = -0.25
             # CDELT2 = +0.25
             # AITOFF
             # NAXIS1 = 1440
             # NAXIS2 = 720
-            c = ROOT.TMath.Sqrt2()*2/ROOT.TMath.Pi()
+            c = 1.4142135623730951*2/math.pi
             y = (y_ + 1)/2.*c + (1 - c)/2.
             x = (-x_ + 2)/4.*c + (1 - c)/2.
             return x, y
