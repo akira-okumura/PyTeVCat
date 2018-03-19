@@ -1,6 +1,7 @@
 """
 Python interface for TeVCat (http://tevcat.uchicago.edu/)
 """
+from __future__ import print_function
 
 import urllib
 import base64
@@ -135,18 +136,18 @@ class Source(object):
         
         self.observatory_name = str(source[u'observatory_name'])
         if self.observatory_name not in observatory_names.values():
-            print 'Unknown observatory name found: ', self.observatory_name
+            print('Unknown observatory name found: ', self.observatory_name)
 
         self.discoverer = int(source[u'discoverer'])
         try:
             if observatory_names[self.discoverer] != self.observatory_name:
-                print '"discoverer" (%d) does not match with "observatory_name" (%s)' % (self.discoverer, self.observatory_name)
+                print('"discoverer" (%d) does not match with "observatory_name" (%s)' % (self.discoverer, self.observatory_name))
         except:
             raise BaseException('Cannot find discoverer "%s" (%d)' % (self.observatory_name, self.discoverer))
             
         self.variability = None if source[u'variability'] == None else int(source[u'variability'])
         if self.variability not in (None, 0, 1, 2):
-            print 'Unknown variability type found'
+            print('Unknown variability type found')
 
         self.image = str(source[u'image']) # No use. URL of marker
 
@@ -155,13 +156,13 @@ class Source(object):
 
         self.owner = None if source[u'owner'] == None else int(source[u'owner']) # for what?
         if self.owner not in (None, 1, 2):
-            print 'Unknown owner type found'
+            print('Unknown owner type found')
 
         self.id = int(source[u'id'])
 
         self.discovery_date = None if source[u'discovery_date'] == None else int(source[u'discovery_date'].replace('/', ''))
         if self.discovery_date != None and ((not (1 <= self.discovery_date%100 <= 12)) or not (1987 <= self.discovery_date/100 <= 2020)):
-            print 'Invalid date format found: %d' % self.discovery_date
+            print('Invalid date format found: %d' % self.discovery_date)
 
         self.other_names = source[u'other_names']
 
@@ -187,9 +188,9 @@ class Source(object):
 
         self.source_type_name = str(source[u'source_type_name'])
         if self.source_type_name not in source_type_names.values():
-            print 'Unknown source type name found: ', self.source_type_name
+            print('Unknown source type name found: ', self.source_type_name)
         if source_type_names[self.source_type] != self.source_type_name:
-            print '"source_type" (%d) does not match with "source_type_name" (%s)' % (self.source_type, self.source_type_name)
+            print('"source_type" (%d) does not match with "source_type_name" (%s)' % (self.source_type, self.source_type_name))
 
         self.distance = None if source[u'distance'] == None else float(source[u'distance'])
 
@@ -209,7 +210,7 @@ class Source(object):
 
         self.distance_mod = None if source[u'distance_mod'] == None else str(source[u'distance_mod'])
         if self.distance_mod not in (None, 'z', 'kpc'):
-            print 'Unknown distance mode found: ', self.distance_mod
+            print('Unknown distance mode found: ', self.distance_mod)
 
         self.flux = None if source[u'flux'] == None else float(source[u'flux'])
         
