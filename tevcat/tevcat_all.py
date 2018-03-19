@@ -3,12 +3,10 @@ Python interface for TeVCat (http://tevcat.uchicago.edu/)
 """
 from __future__ import print_function
 
-from future import standard_library
-standard_library.install_aliases()
 from builtins import str
 from builtins import range
 from builtins import object
-import urllib.request, urllib.parse, urllib.error
+import requests
 import base64
 import tempfile
 import json
@@ -68,11 +66,9 @@ class TeVCat(object):
         """
         Initialize database by downloading HTML data from the TeVCat home page
         """
-        url = 'http://tevcat.uchicago.edu/'
-        tmp = tempfile.NamedTemporaryFile()
-        urllib.request.urlretrieve(url, tmp.name)
-        f = open(tmp.name)
-        for line in f.readlines():
+        url = u'http://tevcat.uchicago.edu/'
+        response = requests.get(url, stream=True)
+        for line in response.iter_lines():
             if line.find('Version') >= 0:
                 self.version = line.split()[-1]
             elif line.find('var dat  =') >= 0:
