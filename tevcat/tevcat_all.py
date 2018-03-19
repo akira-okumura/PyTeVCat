@@ -3,7 +3,12 @@ Python interface for TeVCat (http://tevcat.uchicago.edu/)
 """
 from __future__ import print_function
 
-import urllib
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
+import urllib.request, urllib.parse, urllib.error
 import base64
 import tempfile
 import json
@@ -63,7 +68,7 @@ class TeVCat(object):
         """
         url = 'http://tevcat.uchicago.edu/'
         tmp = tempfile.NamedTemporaryFile()
-        urllib.urlretrieve(url, tmp.name)
+        urllib.request.urlretrieve(url, tmp.name)
         f = open(tmp.name)
         for line in f.readlines():
             if line.find('Version') >= 0:
@@ -79,7 +84,7 @@ class TeVCat(object):
         for i in range(len(self.json[u'sources'])):
             self.sources.append(Source(self.json[u'sources'][i], self))
         self.catalogs = {}
-        for key in self.json[u'catalogs'].keys():
+        for key in list(self.json[u'catalogs'].keys()):
             self.catalogs[int(key)] = Catalog(self.json[u'catalogs'][key])
 
     def getCatalog(self, i):
@@ -135,7 +140,7 @@ class Source(object):
         self.tevcat = tevcat
         
         self.observatory_name = str(source[u'observatory_name'])
-        if self.observatory_name not in observatory_names.values():
+        if self.observatory_name not in list(observatory_names.values()):
             print('Unknown observatory name found: ', self.observatory_name)
 
         self.discoverer = int(source[u'discoverer'])
@@ -187,7 +192,7 @@ class Source(object):
         self.coord_type = source[u'coord_type'] # No use? always null or 0
 
         self.source_type_name = str(source[u'source_type_name'])
-        if self.source_type_name not in source_type_names.values():
+        if self.source_type_name not in list(source_type_names.values()):
             print('Unknown source type name found: ', self.source_type_name)
         if source_type_names[self.source_type] != self.source_type_name:
             print('"source_type" (%d) does not match with "source_type_name" (%s)' % (self.source_type, self.source_type_name))
@@ -566,7 +571,7 @@ else:
                                                  (py + self.subsize/8 + 0.)/self.ysize)
                 
                 try:
-                    for gra in self.graphs.values():
+                    for gra in list(self.graphs.values()):
                         gra.Draw('p same')
                 except:
                     pass
@@ -699,7 +704,7 @@ else:
             self.legend.SetBorderSize(0)
             self.legend.SetFillStyle(0)
             self.legend.SetLineStyle(0)
-            for source_type in self.graphs.keys():
+            for source_type in list(self.graphs.keys()):
                 self.legend.AddEntry(self.graphs[source_type], source_type, 'p')
             self.legend.Draw()
 
