@@ -41,6 +41,7 @@ source_type_names = {1:  'HBL',
                      16: 'Shell',
                      17: 'Starburst',
                      18: 'UNID',
+                     20: 'BIN',
                      21: 'XRB',
                      22: 'Cat. Var.',
                      24: 'FSRQ',
@@ -55,7 +56,8 @@ source_type_names = {1:  'HBL',
                      35: 'Binary',
                      36: 'Composite SNR',
                      37: 'Blazar',
-                     38: 'Superbubble'}
+                     38: 'Superbubble',
+                     39: 'Extended TeV Halo'}
 
 def p(a, b):
     return a[0:b]
