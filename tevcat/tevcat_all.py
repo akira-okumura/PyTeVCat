@@ -8,7 +8,6 @@ from builtins import range
 from builtins import object
 import requests
 import base64
-import tempfile
 import json
 from astropy.coordinates import SkyCoord, Angle
 from astropy import units as u
@@ -67,14 +66,15 @@ class TeVCat(object):
         Initialize database by downloading HTML data from the TeVCat home page
         """
         url = u'http://tevcat.uchicago.edu/'
-        response = requests.get(url, stream=True)
-        for line in response.iter_lines():
-            if line.find('Version') >= 0:
+        response = requests.get(url)
+
+        for line in response.text.split(u"\n"):
+            if line.find(u'Version') >= 0:
                 self.version = line.split()[-1]
-            elif line.find('var dat  =') >= 0:
-                data = line.split('"')[1]
-            elif line.find('pytevcat') >= 0:
-                lim = int(line.split('pytevcat = ')[1].split(';')[0])
+            elif line.find(u'var dat  =') >= 0:
+                data = line.split(u'"')[1]
+            elif line.find(u'pytevcat') >= 0:
+                lim = int(line.split(u'pytevcat = ')[1].split(u';')[0])
 
         self.json = json.loads(base64.b64decode(data[0:lim]))
 
