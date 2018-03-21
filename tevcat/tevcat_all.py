@@ -136,7 +136,7 @@ class Source(object):
         Initialize source parameters with JSON data
         """
         self.tevcat = tevcat
-        
+
         self.observatory_name = str(source[u'observatory_name'])
         if self.observatory_name not in list(observatory_names.values()):
             print('Unknown observatory name found: ', self.observatory_name)
@@ -147,7 +147,7 @@ class Source(object):
                 print('"discoverer" (%d) does not match with "observatory_name" (%s)' % (self.discoverer, self.observatory_name))
         except:
             raise BaseException('Cannot find discoverer "%s" (%d)' % (self.observatory_name, self.discoverer))
-            
+
         self.variability = None if source[u'variability'] == None else int(source[u'variability'])
         if self.variability not in (None, 0, 1, 2):
             print('Unknown variability type found')
@@ -216,7 +216,7 @@ class Source(object):
             print('Unknown distance mode found: ', self.distance_mod)
 
         self.flux = None if source[u'flux'] == None else float(source[u'flux'])
-        
+
         self.ext = bool(int(source[u'ext']))
 
         self.catalog_id = int(source[u'catalog_id'])
@@ -475,7 +475,7 @@ else:
             self.controls.AddFrame(self.info, ROOT.TGLayoutHints(ROOT.kLHintsExpandX | ROOT.kLHintsExpandY))
 
             self.search_dispatch = ROOT.TPyDispatcher(self.sources_update)
-            
+
             # Search Box
             self.search_frame = ROOT.TGHorizontalFrame(self.controls)
             self.controls.AddFrame(self.search_frame, ROOT.TGLayoutHints(ROOT.kLHintsExpandX))
@@ -552,14 +552,14 @@ else:
         def sub_update(self):
             self.subCanvas.GetCanvas().Clear()
             self.subCanvas.GetCanvas().cd()
-                                    
+
             if self.sub_image != None:
                 px = int(self.mainCanvas.GetCanvas().GetEventX())
                 py = int(self.ysize - self.mainCanvas.GetCanvas().GetEventY())
                 self.info_update(px, py)
-                
+
                 if px - self.subsize/8 >= 0 and py - self.subsize/8 >= 0:
-                    self.sub_image.Zoom(px - self.subsize/8, py - self.subsize/8, self.subsize/4, self.subsize/4)
+                    self.sub_image.Zoom(px - int(self.subsize/8), py - int(self.subsize/8), int(self.subsize/4), int(self.subsize/4))
                 self.sub_image.SetEditable(1)
                 self.sub_image.Draw()
 
@@ -567,7 +567,7 @@ else:
                                                  (py - self.subsize/8 + 0.)/self.ysize,
                                                  (px + self.subsize/8 + 0.)/self.xsize,
                                                  (py + self.subsize/8 + 0.)/self.ysize)
-                
+
                 try:
                     for gra in list(self.graphs.values()):
                         gra.Draw('p same')
@@ -652,7 +652,7 @@ else:
             self.graphs = {}
             self.source_names = []
             self.source_names_large = []
-            
+
             search = self.search_box.GetText().lower()
 
             for source in self.tevcat.getSources():
@@ -692,7 +692,7 @@ else:
                     self.source_names_large[-1].SetTextSize(0.06)
 
             for i, gra in enumerate(self.graphs.values()):
-                gra.SetMarkerColor(i/4 + 2)                
+                gra.SetMarkerColor(int(i/4) + 2)
                 gra.SetMarkerStyle(20 + i%10)
                 gra.SetMarkerSize(1)
 
@@ -745,7 +745,7 @@ else:
             i = numpy.argmin(degs)
             minimum_angsep = degs[i]
             nearby_source = sources[i]
-                
+
             if minimum_angsep > 3.:
                 self.info.SetText(ROOT.TGText(""))
                 return
@@ -753,7 +753,7 @@ else:
             text = ROOT.TGText('')
             info = nearby_source.__str__().replace(u'\xb0', u'') # another candidate?
             info = str(info.replace(u'\u2212', u'-').replace(u'\u2013', u'-'))
-            
+
             for i, line in enumerate(info.split('\n')):
                 text.InsLine(i, line)
             self.info.SetText(text)
@@ -767,15 +767,15 @@ else:
             gamma = (2. - (x_/2.)**2 - y_**2)**-0.5
             theta = math.asin(y_/gamma)
             phi = math.asin(x_/(2.*gamma*math.cos(theta)))*2.
-            
+
             if abs(x_) > 2.*math.cos(theta) or abs(y_) > 1.:
                 return None
 
             l = phi*rad2deg
+
             b = theta*rad2deg
-            
             return (l, b)
-            
+
         def sky2pad(self, l, b):
             while l > 180.:
                 l -= 360
