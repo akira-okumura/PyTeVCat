@@ -54,7 +54,9 @@ source_type_names = {1:  'HBL',
                      36: 'Composite SNR',
                      37: 'Blazar',
                      38: 'Superbubble',
-                     39: 'Extended TeV Halo'}
+                     39: 'Extended TeV Halo',
+                     40: 'GRB',
+                     41: 'PWN/TeV Halo'}
 
 def p(a, b):
     return a[0:b]
@@ -164,7 +166,7 @@ class Source(object):
         self.id = int(source[u'id'])
 
         self.discovery_date = None if source[u'discovery_date'] == None else int(source[u'discovery_date'].replace('/', ''))
-        if self.discovery_date != None and ((not (1 <= self.discovery_date%100 <= 12)) or not (1987 <= self.discovery_date/100 <= 2020)):
+        if self.discovery_date != None and ((not (1 <= self.discovery_date%100 <= 12)) or not (1987 <= self.discovery_date/100)):
             print('Invalid date format found: %d' % self.discovery_date)
 
         self.other_names = source[u'other_names']
@@ -193,7 +195,7 @@ class Source(object):
         if self.source_type_name not in list(source_type_names.values()):
             print('Unknown source type name found: ', self.source_type_name)
         if source_type_names[self.source_type] != self.source_type_name:
-            print('"source_type" (%d) does not match with "source_type_name" (%s)' % (self.source_type, self.source_type_name))
+            print('"source_type" (%d) does is not consistent with "source_type_name" (%s)' % (self.source_type, self.source_type_name))
 
         self.distance = None if source[u'distance'] == None else float(source[u'distance'])
 
@@ -415,7 +417,10 @@ class Source(object):
         s += 'Gal Lat:\t%.2f (deg)\n' % self.getGalactic().b.degree
         dist = self.getDistance()
         if dist[1] == 'z':
-            s += 'Distance:\tz = %f\n' % dist[0]
+            if dist[0]:
+                s += 'Distance:\tz = %f\n' % dist[0]
+            else:
+                s += 'Distance:\tz = N/A\n'
         elif dist[1] == 'kpc':
             s += 'Distance:\t%f kpc\n' % dist[0]
         else:
