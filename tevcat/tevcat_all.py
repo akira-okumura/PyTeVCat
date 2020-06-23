@@ -56,7 +56,8 @@ source_type_names = {1:  'HBL',
                      38: 'Superbubble',
                      39: 'Extended TeV Halo',
                      40: 'GRB',
-                     41: 'PWN/TeV Halo'}
+                     41: 'PWN/TeV Halo'
+                     42: 'TeV Halo'}
 
 def p(a, b):
     return a[0:b]
