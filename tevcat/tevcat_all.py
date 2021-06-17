@@ -195,7 +195,7 @@ class Source(object):
         if self.source_type_name not in list(source_type_names.values()):
             print('Unknown source type name found: ', self.source_type_name)
         if source_type_names[self.source_type] != self.source_type_name:
-            print('"source_type" (%d) does is not consistent with "source_type_name" (%s)' % (self.source_type, self.source_type_name))
+            print('"source_type" (%d) is not consistent with "source_type_name" (%s)' % (self.source_type, self.source_type_name))
 
         self.distance = None if source[u'distance'] == None else float(source[u'distance'])
 
