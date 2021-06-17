@@ -5,7 +5,7 @@ Setup script for PyTeVCat
 from numpy.distutils.core import setup
 
 setup(name="PyTeVCat",
-      version="1.3.1",
+      version="1.3.2",
       description="Python wrapper for TeVCat",
       author="Akira Okumura",
       author_email="oxon@mac.com",

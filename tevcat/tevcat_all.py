@@ -27,7 +27,8 @@ observatory_names = {1:  'Whipple',
                      14: 'VERITAS',
                      15: 'Potchefstroom',
                      19: 'ARGO-YBJ',
-                     22: 'HAWC'}
+                     22: 'HAWC',
+                     25: 'LHAASO'}
 
 source_type_names = {1:  'HBL',
                      7:  'DARK',
@@ -54,7 +55,7 @@ source_type_names = {1:  'HBL',
                      36: 'Composite SNR',
                      37: 'Blazar',
                      38: 'Superbubble',
-                     39: 'Extended TeV Halo',
+                     39: 'TeV Halo',
                      40: 'GRB',
                      41: 'PWN/TeV Halo'}
 
@@ -139,20 +140,28 @@ class Source(object):
         """
         self.tevcat = tevcat
 
+        self.canonical_name = str(source[u'canonical_name'])
+
         self.observatory_name = str(source[u'observatory_name'])
         if self.observatory_name not in list(observatory_names.values()):
-            print('Unknown observatory name found: ', self.observatory_name)
-
-        self.discoverer = int(source[u'discoverer'])
+            print('Unknown observatory name found in %s: ' % self.canonical_name, self.observatory_name)
+        
         try:
-            if observatory_names[self.discoverer] != self.observatory_name:
-                print('"discoverer" (%d) does not match with "observatory_name" (%s)' % (self.discoverer, self.observatory_name))
+            self.discoverer = int(source[u'discoverer'])
+            try:
+                if observatory_names[self.discoverer] != self.observatory_name:
+                    print('"discoverer" (%d) does not match with "observatory_name" (%s)' % (self.discoverer, self.observatory_name))
+            except:
+                print('Cannot find the discoverer "%s" (%d) of %s in tevcat_all.py, but will add it in the dictionary.' % (self.observatory_name, self.discoverer, self.canonical_name))
+                print('Please make an issure report on GitHub.')
+                observatory_names[self.discoverer] = self.observatory_name
         except:
-            raise BaseException('Cannot find discoverer "%s" (%d)' % (self.observatory_name, self.discoverer))
+            print('Unknown "discoverer" ID found in %s:' % self.canonical_name, source[u'discoverer'])
+            self.discoverer = None
 
         self.variability = None if source[u'variability'] == None else int(source[u'variability'])
         if self.variability not in (None, 0, 1, 2):
-            print('Unknown variability type found')
+            print('Unknown variability type found in %s' % self.canonical_name)
 
         self.image = str(source[u'image']) # No use. URL of marker
 
@@ -170,8 +179,6 @@ class Source(object):
             print('Invalid date format found: %d' % self.discovery_date)
 
         self.other_names = source[u'other_names']
-
-        self.canonical_name = str(source[u'canonical_name'])
 
         self.marker_id = source[u'marker_id'] # No use? always None
 
