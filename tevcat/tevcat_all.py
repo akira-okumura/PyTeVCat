@@ -57,7 +57,10 @@ source_type_names = {1:  'HBL',
                      38: 'Superbubble',
                      39: 'TeV Halo',
                      40: 'GRB',
-                     41: 'PWN/TeV Halo'}
+                     41: 'PWN/TeV Halo',
+                     42: 'Giant Molecular Cloud',
+                     43: 'SNR',
+                     44: 'Nova'}
 
 def p(a, b):
     return a[0:b]
@@ -153,7 +156,7 @@ class Source(object):
                     print('"discoverer" (%d) does not match with "observatory_name" (%s)' % (self.discoverer, self.observatory_name))
             except:
                 print('Cannot find the discoverer "%s" (%d) of %s in tevcat_all.py, but will add it in the dictionary.' % (self.observatory_name, self.discoverer, self.canonical_name))
-                print('Please make an issure report on GitHub.')
+                print('Please make an issue report on GitHub.')
                 observatory_names[self.discoverer] = self.observatory_name
         except:
             print('Unknown "discoverer" ID found in %s:' % self.canonical_name, source[u'discoverer'])
@@ -201,6 +204,9 @@ class Source(object):
         self.source_type_name = str(source[u'source_type_name'])
         if self.source_type_name not in list(source_type_names.values()):
             print('Unknown source type name found: ', self.source_type_name)
+            print(f'Adding the new source type {self.source_type} as "{self.source_type_name}"')
+            print(f'Please ask the developer to update the dictionary')
+            source_type_names[self.source_type] = self.source_type_name
         if source_type_names[self.source_type] != self.source_type_name:
             print('"source_type" (%d) is not consistent with "source_type_name" (%s)' % (self.source_type, self.source_type_name))
 
