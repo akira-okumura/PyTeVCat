@@ -28,12 +28,14 @@ observatory_names = {1:  'Whipple',
                      15: 'Potchefstroom',
                      19: 'ARGO-YBJ',
                      22: 'HAWC',
-                     25: 'LHAASO'}
+                     25: 'LHAASO',
+                     29: 'LST-1'}
 
 source_type_names = {1:  'HBL',
                      7:  'DARK',
                      8:  'FRI',
                      10: 'LBL',
+                     11: 'Microquasar',
                      13: 'PSR',
                      14: 'PWN',
                      16: 'Shell',
@@ -60,7 +62,9 @@ source_type_names = {1:  'HBL',
                      41: 'PWN/TeV Halo',
                      42: 'Giant Molecular Cloud',
                      43: 'SNR',
-                     44: 'Nova'}
+                     44: 'Nova',
+                     45: 'TeV Halo Candidate',
+                     46: 'LLAGN'}
 
 def p(a, b):
     return a[0:b]
@@ -71,8 +75,10 @@ class TeVCat(object):
         """
         Initialize database by downloading HTML data from the TeVCat home page
         """
-        url = u'http://tevcat.uchicago.edu/'
+        url = u'https://www.tevcat.org'
         response = requests.get(url)
+
+        self.version = None
 
         for line in response.text.split(u"\n"):
             if line.find(u'Version') >= 0:
@@ -146,7 +152,9 @@ class Source(object):
         self.canonical_name = str(source[u'canonical_name'])
 
         self.observatory_name = str(source[u'observatory_name'])
-        if self.observatory_name not in list(observatory_names.values()):
+        if self.observatory_name == 'None':
+            pass
+        elif self.observatory_name not in list(observatory_names.values()):
             print('Unknown observatory name found in %s: ' % self.canonical_name, self.observatory_name)
         
         try:
@@ -159,7 +167,10 @@ class Source(object):
                 print('Please make an issue report on GitHub.')
                 observatory_names[self.discoverer] = self.observatory_name
         except:
-            print('Unknown "discoverer" ID found in %s:' % self.canonical_name, source[u'discoverer'])
+            if source[u'discoverer'] == None:
+                pass
+            else:
+                print('Unknown "discoverer" ID found in %s:' % self.canonical_name, source[u'discoverer'])
             self.discoverer = None
 
         self.variability = None if source[u'variability'] == None else int(source[u'variability'])

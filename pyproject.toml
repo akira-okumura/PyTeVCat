@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "PyTeVCat"
-version = "1.3.2"
+version = "1.3.3"
 description = "Python wrapper for TeVCat"
 authors = [
     { name = "Akira Okumura", email = "oxon@mac.com" }
