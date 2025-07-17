@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools >= 61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "PyTeVCat"
+version = "1.3.2"
+description = "Python wrapper for TeVCat"
+authors = [
+    { name = "Akira Okumura", email = "oxon@mac.com" }
+]
+readme = {file = "README.md", content-type = "text/markdown"}
+license = {text = "BSD License"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "numpy", 'astropy', 'future', 'requests'
+]
+
+[project.urls]
+Repository = "https://github.com/akira-okumura/PyTeVCat.git"
+Issues = "https://github.com/akira-okumura/PyTeVCat/issues"
